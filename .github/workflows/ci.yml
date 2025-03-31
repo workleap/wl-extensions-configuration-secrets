@@ -8,6 +8,12 @@ on:
     branches:
       - "renovate/**"
   
+# We are using OpenID Connect to authenticate with Azure with secret.
+# https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-azure
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   ci:
     runs-on: ${{ matrix.runs-on }}
@@ -57,3 +63,5 @@ jobs:
     with:
       environment: development
     secrets: inherit
+
+
