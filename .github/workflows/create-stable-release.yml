@@ -1,8 +1,6 @@
 name: Create stable release
 
 on:
-  pull_request:
-    branches: [main]
   schedule:
     - cron: "0 3 * * 0" # At 03:00 on Sunday
   workflow_dispatch:
@@ -12,4 +10,4 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: workleap/wl-reusable-workflows/.github/workflows/create-stable-release.yml@feature/idp-3311_migrate_jira
+    uses: workleap/wl-reusable-workflows/.github/workflows/create-stable-release.yml@main

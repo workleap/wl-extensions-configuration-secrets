@@ -55,7 +55,7 @@ jobs:
 
   linearb:
     needs: [ci]
-    uses: workleap/wl-reusable-workflows/.github/workflows/linearb-deployment.yml@feature/idp-3311_migrate_jira
+    uses: workleap/wl-reusable-workflows/.github/workflows/linearb-deployment.yml@main
     with:
       environment: development
     permissions:
