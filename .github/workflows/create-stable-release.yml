@@ -1,6 +1,8 @@
 name: Create stable release
 
 on:
+  pull_request:
+    branches: [main]
   schedule:
     - cron: "0 3 * * 0" # At 03:00 on Sunday
   workflow_dispatch:
