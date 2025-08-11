@@ -22,6 +22,8 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
         "Local", "LocalDocker", "Test", "Tests", "CI", Environments.Development, "DevelopmentDocker",
     };
 
+    // The following environment variables are defined by continuous integration servers
+    // Inspired from https://github.com/watson/ci-info/blob/v3.3.1/vendors.json
     private static readonly string[] KnownContinuousIntegrationEnvironmentVariables = {
         "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI", // Azure Pipelines
         "GITHUB_ACTIONS", // GitHub Actions
@@ -62,10 +64,13 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
             return new CachedInteractiveBrowserCredential();
         }
 
-        // When Fiddler is not active, if running on a Build Agent, use DefaultAzureCredential in order to try with Managed Identity first
-        // if running locally, try to use AzureCliCredential because it's usually faster than DefaultAzureCredential on startup
-        return IsRunningOnBuildAgent
-            ? new DefaultAzureCredential()
-            : new ChainedTokenCredential(new AzureCliCredential(), new DefaultAzureCredential());
+        // If running on a Build Agent, use DefaultAzureCredential in order to try with Managed Identity, before trying with Azure CLI.
+        if (IsRunningOnBuildAgent)
+        {
+            return new DefaultAzureCredential();
+        }
+
+        // Uf running locally, try to use AzureCliCredential first because it's usually faster than DefaultAzureCredential on startup
+        return new ChainedTokenCredential(new AzureCliCredential(), new DefaultAzureCredential());
     }
 }
