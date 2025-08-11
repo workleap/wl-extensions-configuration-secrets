@@ -33,9 +33,9 @@ builder.Services.AddKeyVaultSecrets();
 ## Using the registered services
 
 `ITokenCredentialProvider` and its public implementation `TokenCredentialProvider` provides an instance of `TokenCredential`  based on the current environment:
-* `ManagedIdentityCredential` on a non-development environment,
-* Chained credentials of `AzureCliCredential` and `ManagedIdentityCredential` in development environment, or
-* `CachedInteractiveBrowserCredential` in development environment only when **Fiddler** is opened (Fiddler interferes with `az login` authentication).
+* `DefaultAzureCredential` on a non-development environment or on a Build Agent
+* Chained credentials of `AzureCliCredential` and `DefaultAzureCredential` on a development environment
+* `CachedInteractiveBrowserCredential` on a development environment only when **Fiddler** is opened (Fiddler interferes with `az login` authentication).
 
 ```csharp
 var azureCredential = new TokenCredentialProvider(environment).GetTokenCredential(); // or
@@ -59,4 +59,4 @@ var secretClient = secretClientProvider.GetSecretClient(configurationKey);
 
 ## License
 
-Copyright © 2022, Workleap. This code is licensed under the Apache License, Version 2.0. You may obtain a copy of this license at https://github.com/workleap/gsoft-license/blob/master/LICENSE.
+Copyright © 2025, Workleap. This code is licensed under the Apache License, Version 2.0. You may obtain a copy of this license at https://github.com/workleap/gsoft-license/blob/master/LICENSE.

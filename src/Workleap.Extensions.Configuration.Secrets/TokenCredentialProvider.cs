@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.Hosting;
@@ -21,12 +22,21 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
         "Local", "LocalDocker", "Test", "Tests", "CI", Environments.Development, "DevelopmentDocker",
     };
 
+    private static readonly string[] KnownContinuousIntegrationEnvironmentVariables = {
+        "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI", // Azure Pipelines
+        "GITHUB_ACTIONS", // GitHub Actions
+        "TEAMCITY", // TeamCity
+    };
+
     private readonly IHostEnvironment _environment;
 
     public TokenCredentialProvider(IHostEnvironment environment)
     {
         this._environment = environment;
     }
+
+    private static bool IsRunningOnBuildAgent => KnownContinuousIntegrationEnvironmentVariables
+        .Any(x => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(x)));
 
     public TokenCredential GetTokenCredential()
     {
@@ -47,9 +57,15 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
     private static TokenCredential GetAzureCliCompatibleTokenCredential()
     {
         // Azure CLI does not work when Fiddler is active so we need to use an interactive authentication method instead
-        // When Fiddler is not active, we try to use AzureCliCredential because it's way faster than DefaultAzureCredential on startup (instantaneous VS several seconds)
-        return FiddlerProxyDetector.IsFiddlerActive()
-            ? new CachedInteractiveBrowserCredential()
+        if (FiddlerProxyDetector.IsFiddlerActive())
+        {
+            return new CachedInteractiveBrowserCredential();
+        }
+
+        // When Fiddler is not active, if running on a Build Agent, use DefaultAzureCredential in order to try with Managed Identity first
+        // if running locally, try to use AzureCliCredential because it's usually faster than DefaultAzureCredential on startup
+        return IsRunningOnBuildAgent
+            ? new DefaultAzureCredential()
             : new ChainedTokenCredential(new AzureCliCredential(), new DefaultAzureCredential());
     }
 }
