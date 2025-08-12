@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.Hosting;
@@ -21,12 +22,23 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
         "Local", "LocalDocker", "Test", "Tests", "CI", Environments.Development, "DevelopmentDocker",
     };
 
+    // The following environment variables are defined by continuous integration servers
+    // Inspired from https://github.com/watson/ci-info/blob/v3.3.1/vendors.json
+    private static readonly string[] KnownContinuousIntegrationEnvironmentVariables = {
+        "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI", // Azure Pipelines
+        "GITHUB_ACTIONS", // GitHub Actions
+        "TEAMCITY", // TeamCity
+    };
+
     private readonly IHostEnvironment _environment;
 
     public TokenCredentialProvider(IHostEnvironment environment)
     {
         this._environment = environment;
     }
+
+    private static bool IsRunningOnBuildAgent => KnownContinuousIntegrationEnvironmentVariables
+        .Any(x => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(x)));
 
     public TokenCredential GetTokenCredential()
     {
@@ -47,9 +59,18 @@ public sealed class TokenCredentialProvider : ITokenCredentialProvider
     private static TokenCredential GetAzureCliCompatibleTokenCredential()
     {
         // Azure CLI does not work when Fiddler is active so we need to use an interactive authentication method instead
-        // When Fiddler is not active, we try to use AzureCliCredential because it's way faster than DefaultAzureCredential on startup (instantaneous VS several seconds)
-        return FiddlerProxyDetector.IsFiddlerActive()
-            ? new CachedInteractiveBrowserCredential()
-            : new ChainedTokenCredential(new AzureCliCredential(), new DefaultAzureCredential());
+        if (FiddlerProxyDetector.IsFiddlerActive())
+        {
+            return new CachedInteractiveBrowserCredential();
+        }
+
+        // If running on a Build Agent, use DefaultAzureCredential in order to try with Managed Identity, before trying with Azure CLI.
+        if (IsRunningOnBuildAgent)
+        {
+            return new DefaultAzureCredential();
+        }
+
+        // Uf running locally, try to use AzureCliCredential first because it's usually faster than DefaultAzureCredential on startup
+        return new ChainedTokenCredential(new AzureCliCredential(), new DefaultAzureCredential());
     }
 }
