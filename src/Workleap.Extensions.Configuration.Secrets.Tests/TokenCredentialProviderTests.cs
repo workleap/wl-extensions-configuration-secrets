@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 

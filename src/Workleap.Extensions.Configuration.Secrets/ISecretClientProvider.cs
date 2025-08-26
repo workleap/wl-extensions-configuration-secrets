@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Azure.Security.KeyVault.Secrets;
 
 namespace Workleap.Extensions.Configuration.Secrets;
