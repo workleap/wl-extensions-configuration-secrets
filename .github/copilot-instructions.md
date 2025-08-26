@@ -82,14 +82,6 @@ Always reference these instructions first and fallback to search or bash command
 - `src/Workleap.Extensions.Configuration.Secrets/SecretClientProvider.cs` - Key Vault client provider
 - `src/Workleap.Extensions.Configuration.Secrets/PublicAPI.Shipped.txt` - API compatibility tracking
 
-### Build Timing Expectations
-- `dotnet clean`: ~1 second
-- `dotnet restore`: ~1 second  
-- `dotnet build`: ~2-6 seconds
-- `dotnet test`: ~1-2 seconds
-- `dotnet pack`: ~1-2 seconds
-- `dotnet format`: ~10 seconds
-- Full `Build.ps1`: May take several minutes due to GitVersion
 
 ### Working with Release Builds
 - Release builds via `Build.ps1` may fail due to GitVersion requirements (tested: fails with GitVersion MSBuild target errors)
