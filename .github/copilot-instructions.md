@@ -21,11 +21,11 @@ Always reference these instructions first and fallback to search or bash command
 - Development workflow (Debug builds work reliably):
   ```bash
   cd src
-  dotnet clean              # Takes ~1 second
-  dotnet restore            # Takes ~1 second  
-  dotnet build              # Takes ~2-6 seconds
-  dotnet test               # Takes ~1-2 seconds. NEVER CANCEL: Set timeout to 5+ minutes
-  dotnet pack -c Debug -o .output  # Takes ~1-2 seconds
+  dotnet clean
+  dotnet restore
+  dotnet build
+  dotnet test
+  dotnet pack -c Debug -o .output
   ```
 
 - Full Release build (can have GitVersion issues):
