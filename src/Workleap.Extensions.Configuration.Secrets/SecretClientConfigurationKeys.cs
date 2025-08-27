@@ -1,4 +1,4 @@
-﻿namespace Workleap.Extensions.Configuration.Secrets;
+namespace Workleap.Extensions.Configuration.Secrets;
 
 public static class SecretClientConfigurationKeys
 {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
